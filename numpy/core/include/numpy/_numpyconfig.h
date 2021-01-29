@@ -11,13 +11,12 @@
 /// [IGE]: check 64bits environments
 #if defined(__LP64__) || defined(_WIN64) || (defined(__x86_64__) && !defined(__ILP32__)) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
     #define NPY_SIZEOF_PY_INTPTR_T 8
-    #define NPY_SIZEOF_OFF_T 8
 #else
     #define NPY_SIZEOF_PY_INTPTR_T 4
-    #define NPY_SIZEOF_OFF_T 4
 #endif
 /// [/IGE]
 
+#define NPY_SIZEOF_OFF_T 4
 #define NPY_SIZEOF_PY_LONG_LONG 8
 #define NPY_SIZEOF_LONGLONG 8
 #define NPY_NO_SIGNAL 1
