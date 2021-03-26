@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
 
-file(TO_CMAKE_PATH $ENV{IGE_LIBS} IGE_LIBS)
-
 set(TARGET_NAME numpy)
 project(${TARGET_NAME})
 
@@ -34,17 +32,11 @@ elseif(IOS)
 endif()
 # [/IGE]
 
-# [IGE]: Add python include and lib declaration
-set (PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Include")
-if (MSVC)
-    list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/PC")
-elseif (OSX)
-    list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Mac")
-elseif (ANDROID)
-    list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/Android")
-elseif (IOS)
-    list(APPEND PYTHON_INCLUDE_DIRS "${IGE_LIBS}/Python/IOS")
-endif ()
+# [IGE]: try include conan build config
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+endif()
 # [/IGE]
 
 set (NUMPY_INCLUDE
@@ -90,5 +82,5 @@ set (NUMPY_SRC ${NUMPY_SRC}
 )
 
 add_library(${TARGET_NAME} STATIC ${NUMPY_SRC})
-target_include_directories(${TARGET_NAME} PRIVATE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE})
+target_include_directories(${TARGET_NAME} PRIVATE ${NUMPY_INCLUDE} ${CONAN_INCLUDE_DIRS})
 target_compile_definitions(${TARGET_NAME} PRIVATE RK_NO_WINCRYPT _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE=1 _LARGEFILE64_SOURCE=1 NPY_NO_DEPRECATED_API=0 BLAS_SYMBOL_PREFIX=np_)
