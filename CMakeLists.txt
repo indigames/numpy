@@ -32,12 +32,16 @@ elseif(IOS)
 endif()
 # [/IGE]
 
-# [IGE]: try include conan build config
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
+
+if(${APP_STYLE} MATCHES "SHARED")
+    find_package (Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS Development)
+else()
+    find_package(Python REQUIRED)
+    set (Python3_INCLUDE_DIRS ${Python_INCLUDE_DIRS})
+    set (Python3_LIBRARIES ${Python_LIBRARIES})
 endif()
-# [/IGE]
 
 set (NUMPY_INCLUDE
   ${CMAKE_CURRENT_SOURCE_DIR}/numpy/core/include
@@ -82,5 +86,25 @@ set (NUMPY_SRC ${NUMPY_SRC}
 )
 
 add_library(${TARGET_NAME} STATIC ${NUMPY_SRC})
-target_include_directories(${TARGET_NAME} PRIVATE ${NUMPY_INCLUDE} ${CONAN_INCLUDE_DIRS})
+target_include_directories(${TARGET_NAME} PRIVATE ${NUMPY_INCLUDE} ${Python3_INCLUDE_DIRS})
 target_compile_definitions(${TARGET_NAME} PRIVATE RK_NO_WINCRYPT _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE=1 _LARGEFILE64_SOURCE=1 NPY_NO_DEPRECATED_API=0 BLAS_SYMBOL_PREFIX=np_)
+
+
+# Install Targets
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
+
+install(TARGETS
+  ${TARGET_NAME}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+file(GLOB_RECURSE PUBLIC_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/numpy/core/include/*.h*")
+foreach(HEADER ${PUBLIC_INCLUDE_FILES})
+    file(RELATIVE_PATH HEADER_RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/numpy/core/include/" "${HEADER}")
+    get_filename_component(DIR ${HEADER_RELATIVE} DIRECTORY)
+    install(FILES ${HEADER} DESTINATION include/${DIR})
+endforeach()
+
+
