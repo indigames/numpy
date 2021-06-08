@@ -195,4 +195,4 @@ tools/swig/test/Vector_wrap.cxx
 tools/swig/test/Array.py
 /_ige_build
 /_ige_release
-/conanfile.py
+/__pycache__
